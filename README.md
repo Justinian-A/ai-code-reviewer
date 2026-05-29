@@ -207,14 +207,6 @@ ai-code-review/
 | POST | /api/github/parse-url | 解析 PR URL |
 | POST | /api/github/pr-info | 获取 PR 信息 |
 
-## 📝 未来计划
-
-- [ ] CLI 命令行工具
-- [ ] GitHub Webhook 自动触发
-- [ ] 多模型支持（Claude、GPT-4）
-- [ ] 团队协作功能
-- [ ] 自定义分析规则
-- [ ] VS Code 插件
 
 ## 🤝 贡献
 
