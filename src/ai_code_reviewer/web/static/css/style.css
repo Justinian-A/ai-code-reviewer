@@ -1,0 +1,342 @@
+/* ============================================
+   AI Code Reviewer - Custom Styles
+   GitHub-inspired minimal professional design
+   ============================================ */
+
+/* CSS Custom Properties (Design Tokens) */
+:root {
+    /* Primary Colors */
+    --color-primary: #0366d6;
+    --color-primary-hover: #0256b9;
+    --color-primary-light: #e8f0fe;
+
+    /* Neutral Colors */
+    --color-text-primary: #24292e;
+    --color-text-secondary: #586069;
+    --color-text-muted: #6a737d;
+
+    /* Background Colors */
+    --color-bg-primary: #ffffff;
+    --color-bg-secondary: #f6f8fa;
+    --color-bg-tertiary: #fafbfc;
+
+    /* Border Colors */
+    --color-border: #e1e4e8;
+    --color-border-light: #f0f0f0;
+
+    /* Semantic Colors */
+    --color-success: #28a745;
+    --color-warning: #dbab09;
+    --color-danger: #d73a49;
+    --color-info: #0366d6;
+
+    /* Spacing Scale (8px base) */
+    --space-1: 0.25rem;  /* 4px */
+    --space-2: 0.5rem;   /* 8px */
+    --space-3: 0.75rem;  /* 12px */
+    --space-4: 1rem;     /* 16px */
+    --space-5: 1.5rem;   /* 24px */
+    --space-6: 2rem;     /* 32px */
+    --space-8: 3rem;     /* 48px */
+
+    /* Typography */
+    --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+    --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+
+    /* Shadows */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
+
+    /* Border Radius */
+    --radius-sm: 4px;
+    --radius-md: 6px;
+    --radius-lg: 8px;
+
+    /* Transitions */
+    --transition-fast: 0.15s ease;
+    --transition-normal: 0.2s ease;
+}
+
+/* Base Styles */
+body {
+    font-family: var(--font-sans);
+    color: var(--color-text-primary);
+    background-color: var(--color-bg-secondary);
+    line-height: 1.5;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Navbar Styles */
+.navbar {
+    background-color: var(--color-bg-primary) !important;
+    border-bottom: 1px solid var(--color-border);
+    padding: var(--space-3) 0;
+}
+
+.navbar-brand {
+    color: var(--color-text-primary) !important;
+    font-size: 1.125rem;
+    font-weight: 600;
+}
+
+.navbar-brand:hover {
+    color: var(--color-primary) !important;
+}
+
+.navbar-brand i {
+    color: var(--color-primary);
+}
+
+.nav-link {
+    color: var(--color-text-secondary) !important;
+    font-size: 0.875rem;
+    font-weight: 500;
+    padding: var(--space-2) var(--space-3) !important;
+    border-radius: var(--radius-md);
+    transition: all var(--transition-fast);
+}
+
+.nav-link:hover {
+    color: var(--color-text-primary) !important;
+    background-color: var(--color-bg-secondary);
+}
+
+.nav-link.active {
+    color: var(--color-primary) !important;
+    font-weight: 600;
+}
+
+.nav-link i {
+    font-size: 0.875rem;
+    margin-right: var(--space-1);
+}
+
+/* Card Styles */
+.card {
+    border-radius: var(--radius-lg);
+    transition: box-shadow var(--transition-normal);
+}
+
+.card:hover {
+    box-shadow: var(--shadow-md);
+}
+
+.card-header {
+    padding: var(--space-4) var(--space-5);
+    border-bottom: 1px solid var(--color-border-light);
+}
+
+.card-body {
+    padding: var(--space-5);
+}
+
+/* Form Styles */
+.form-control:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px var(--color-primary-light);
+}
+
+.form-control::placeholder {
+    color: var(--color-text-muted);
+}
+
+.input-group-text {
+    background-color: var(--color-bg-secondary);
+    border-color: var(--color-border);
+    color: var(--color-text-muted);
+}
+
+.form-text {
+    color: var(--color-text-muted);
+    font-size: 0.75rem;
+}
+
+/* Button Styles */
+.btn-primary {
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
+    font-weight: 500;
+    transition: all var(--transition-fast);
+}
+
+.btn-primary:hover {
+    background-color: var(--color-primary-hover);
+    border-color: var(--color-primary-hover);
+}
+
+.btn-outline-secondary {
+    color: var(--color-text-secondary);
+    border-color: var(--color-border);
+}
+
+.btn-outline-secondary:hover {
+    background-color: var(--color-bg-secondary);
+    border-color: var(--color-border);
+}
+
+/* Table Styles */
+.table {
+    font-size: 0.875rem;
+}
+
+.table thead th {
+    background-color: var(--color-bg-secondary);
+    border-bottom: 1px solid var(--color-border);
+    color: var(--color-text-secondary);
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: var(--space-3) var(--space-4);
+}
+
+.table tbody td {
+    padding: var(--space-3) var(--space-4);
+    vertical-align: middle;
+    border-bottom: 1px solid var(--color-border-light);
+}
+
+.table-hover tbody tr:hover {
+    background-color: var(--color-bg-tertiary);
+}
+
+/* Badge Styles */
+.badge {
+    font-weight: 500;
+    font-size: 0.75rem;
+    padding: var(--space-1) var(--space-2);
+}
+
+.badge.bg-success-subtle {
+    background-color: rgba(40, 167, 69, 0.1) !important;
+}
+
+.badge.bg-warning-subtle {
+    background-color: rgba(219, 171, 9, 0.1) !important;
+}
+
+.badge.bg-danger-subtle {
+    background-color: rgba(215, 58, 73, 0.1) !important;
+}
+
+.badge.bg-info-subtle {
+    background-color: rgba(3, 102, 214, 0.1) !important;
+}
+
+/* Alert Styles */
+.alert {
+    border-radius: var(--radius-md);
+    font-size: 0.875rem;
+}
+
+/* Status Colors */
+.status-pending {
+    color: var(--color-text-muted);
+}
+
+.status-running {
+    color: var(--color-info);
+}
+
+.status-completed {
+    color: var(--color-success);
+}
+
+.status-failed {
+    color: var(--color-danger);
+}
+
+/* Footer Styles */
+.footer {
+    background-color: var(--color-bg-primary);
+    margin-top: auto;
+}
+
+.footer .text-muted {
+    font-size: 0.75rem;
+}
+
+/* Utility Classes */
+.fw-medium {
+    font-weight: 500;
+}
+
+.fw-semibold {
+    font-weight: 600;
+}
+
+/* Stat Cards */
+.card-title i {
+    font-size: 1.5rem;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .card-body {
+        padding: var(--space-4);
+    }
+
+    .table-responsive {
+        font-size: 0.8125rem;
+    }
+}
+
+/* Loading Spinner */
+.spinner-border-sm {
+    width: 1rem;
+    height: 1rem;
+    border-width: 0.15em;
+}
+
+/* Empty State */
+.empty-state {
+    padding: var(--space-8);
+    text-align: center;
+    color: var(--color-text-muted);
+}
+
+.empty-state i {
+    font-size: 2rem;
+    margin-bottom: var(--space-3);
+}
+
+/* Link Styles */
+a {
+    color: var(--color-primary);
+    text-decoration: none;
+    transition: color var(--transition-fast);
+}
+
+a:hover {
+    color: var(--color-primary-hover);
+}
+
+/* Code Styles */
+code {
+    font-family: var(--font-mono);
+    font-size: 0.875em;
+    background-color: var(--color-bg-secondary);
+    padding: 0.2em 0.4em;
+    border-radius: var(--radius-sm);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--color-bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--color-border);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--color-text-muted);
+}

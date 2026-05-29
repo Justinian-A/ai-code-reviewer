@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+
+{% set active_page = "analysis" %}
+
+{% block title %}PR分析 - AI Code Reviewer{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <!-- Page Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1 class="h3 mb-1">PR 分析</h1>
+                <p class="text-muted mb-0">输入 GitHub Pull Request URL 开始智能代码审查</p>
+            </div>
+        </div>
+
+        <!-- Analysis Form Card -->
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body p-4">
+                <form id="analysisForm" class="row g-3 align-items-end">
+                    <div class="col-md-9">
+                        <label for="prUrl" class="form-label fw-medium">Pull Request URL</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0">
+                                <i class="bi bi-github text-muted"></i>
+                            </span>
+                            <input type="url" class="form-control border-start-0" id="prUrl"
+                                   placeholder="https://github.com/owner/repo/pull/123"
+                                   pattern="https://github\.com/[^/]+/[^/]+/pull/\d+"
+                                   required>
+                        </div>
+                        <div class="form-text">格式：https://github.com/owner/repo/pull/123</div>
+                    </div>
+                    <div class="col-md-3">
+                        <button type="submit" class="btn btn-primary w-100" id="analyzeBtn">
+                            <i class="bi bi-play-fill"></i> 开始分析
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Status Alert (hidden by default) -->
+        <div id="statusAlert" class="alert d-none mb-4" role="alert">
+            <div class="d-flex align-items-center">
+                <div class="spinner-border spinner-border-sm me-2 d-none" id="statusSpinner" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <div>
+                    <strong id="statusTitle"></strong>
+                    <span id="statusMessage" class="ms-2"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Stats Row -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm text-center p-3">
+                    <div class="card-body">
+                        <h5 class="card-title text-muted mb-1">
+                            <i class="bi bi-file-earmark-code"></i>
+                        </h5>
+                        <h3 class="mb-0" id="statAnalyses">0</h3>
+                        <small class="text-muted">总分析次数</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm text-center p-3">
+                    <div class="card-body">
+                        <h5 class="card-title text-muted mb-1">
+                            <i class="bi bi-exclamation-triangle"></i>
+                        </h5>
+                        <h3 class="mb-0" id="statRisks">0</h3>
+                        <small class="text-muted">发现风险</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm text-center p-3">
+                    <div class="card-body">
+                        <h5 class="card-title text-muted mb-1">
+                            <i class="bi bi-lightbulb"></i>
+                        </h5>
+                        <h3 class="mb-0" id="statSuggestions">0</h3>
+                        <small class="text-muted">改进建议</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm text-center p-3">
+                    <div class="card-body">
+                        <h5 class="card-title text-muted mb-1">
+                            <i class="bi bi-currency-dollar"></i>
+                        </h5>
+                        <h3 class="mb-0" id="statCost">$0.00</h3>
+                        <small class="text-muted">总花费</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Analyses Table -->
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-bottom">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="bi bi-clock-history me-2"></i>最近分析
+                    </h5>
+                    <a href="/history" class="btn btn-sm btn-outline-secondary">查看全部</a>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light">
+                            <tr>
+                                <th>仓库</th>
+                                <th>PR</th>
+                                <th>状态</th>
+                                <th>风险</th>
+                                <th>建议</th>
+                                <th>费用</th>
+                                <th>时间</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="recentAnalyses">
+                            <tr>
+                                <td colspan="8" class="text-center py-4 text-muted">
+                                    <i class="bi bi-inbox fs-4 d-block mb-2"></i>
+                                    暂无分析记录
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // Index page specific JavaScript
+    document.addEventListener('DOMContentLoaded', function() {
+        // Load recent analyses and stats
+        loadDashboardData();
+    });
+</script>
+{% endblock %}

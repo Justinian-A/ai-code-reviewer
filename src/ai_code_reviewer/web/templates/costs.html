@@ -1,0 +1,234 @@
+{% extends "base.html" %}
+
+{% set active_page = "costs" %}
+
+{% block title %}成本统计 - AI Code Reviewer{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <!-- Page Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1 class="h3 mb-1">成本统计</h1>
+                <p class="text-muted mb-0">API 使用量与费用分析</p>
+            </div>
+            <div class="btn-group" role="group" aria-label="日期范围选择">
+                <button type="button" class="btn btn-outline-secondary btn-sm" data-days="7">7天</button>
+                <button type="button" class="btn btn-outline-secondary btn-sm active" data-days="30">30天</button>
+                <button type="button" class="btn btn-outline-secondary btn-sm" data-days="90">90天</button>
+            </div>
+        </div>
+
+        <!-- Summary Cards -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm text-center p-3">
+                    <div class="card-body">
+                        <h5 class="card-title text-muted mb-1">
+                            <i class="bi bi-currency-dollar"></i>
+                        </h5>
+                        <h3 class="mb-0">$<span id="totalCost">0.00</span></h3>
+                        <small class="text-muted">总成本</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm text-center p-3">
+                    <div class="card-body">
+                        <h5 class="card-title text-muted mb-1">
+                            <i class="bi bi-calculator"></i>
+                        </h5>
+                        <h3 class="mb-0">$<span id="avgCost">0.00</span></h3>
+                        <small class="text-muted">平均成本</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm text-center p-3">
+                    <div class="card-body">
+                        <h5 class="card-title text-muted mb-1">
+                            <i class="bi bi-file-earmark-code"></i>
+                        </h5>
+                        <h3 class="mb-0"><span id="analysisCount">0</span></h3>
+                        <small class="text-muted">分析次数</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm text-center p-3">
+                    <div class="card-body">
+                        <h5 class="card-title text-muted mb-1">
+                            <i class="bi bi-hash"></i>
+                        </h5>
+                        <h3 class="mb-0"><span id="totalTokens">0</span></h3>
+                        <small class="text-muted">总 Token 数</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cost Trend Chart -->
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-bottom">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="bi bi-graph-up me-2"></i>成本趋势
+                    </h5>
+                </div>
+            </div>
+            <div class="card-body">
+                <div style="position: relative; height: 300px;">
+                    <canvas id="costChart"></canvas>
+                </div>
+                <!-- Empty state (hidden by default) -->
+                <div id="chartEmpty" class="empty-state d-none">
+                    <i class="bi bi-bar-chart-line d-block"></i>
+                    <p class="mb-0">暂无数据</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+    let costChart = null;
+
+    // Load cost data from API
+    async function loadCosts(days = 30) {
+        try {
+            const response = await fetch(`/api/costs?days=${days}`);
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
+            const data = await response.json();
+
+            // Update summary cards
+            document.getElementById('totalCost').textContent = data.summary.total_cost.toFixed(2);
+            document.getElementById('avgCost').textContent = data.summary.avg_cost.toFixed(2);
+            document.getElementById('analysisCount').textContent = data.summary.analysis_count;
+            document.getElementById('totalTokens').textContent = data.summary.total_tokens.toLocaleString();
+
+            // Update chart or show empty state
+            if (data.daily_costs && data.daily_costs.length > 0) {
+                document.getElementById('costChart').parentElement.classList.remove('d-none');
+                document.getElementById('chartEmpty').classList.add('d-none');
+                updateChart(data.daily_costs);
+            } else {
+                document.getElementById('costChart').parentElement.classList.add('d-none');
+                document.getElementById('chartEmpty').classList.remove('d-none');
+            }
+        } catch (error) {
+            console.error('Failed to load cost data:', error);
+        }
+    }
+
+    // Render or update the chart
+    function updateChart(dailyCosts) {
+        const ctx = document.getElementById('costChart').getContext('2d');
+
+        if (costChart) {
+            costChart.destroy();
+        }
+
+        costChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: dailyCosts.map(d => d.date),
+                datasets: [{
+                    label: '成本 ($)',
+                    data: dailyCosts.map(d => d.cost),
+                    borderColor: '#0366d6',
+                    backgroundColor: 'rgba(3, 102, 214, 0.1)',
+                    tension: 0.3,
+                    fill: true,
+                    pointBackgroundColor: '#0366d6',
+                    pointBorderColor: '#ffffff',
+                    pointBorderWidth: 2,
+                    pointRadius: 4,
+                    pointHoverRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    intersect: false,
+                    mode: 'index'
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        backgroundColor: '#24292e',
+                        titleFont: {
+                            size: 0.875rem
+                        },
+                        bodyFont: {
+                            size: 0.875rem
+                        },
+                        padding: 12,
+                        cornerRadius: 6,
+                        callbacks: {
+                            label: function(context) {
+                                return ' $' + context.parsed.y.toFixed(2);
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            color: '#586069',
+                            font: {
+                                size: 0.75rem
+                            },
+                            maxRotation: 0,
+                            autoSkip: true,
+                            maxTicksLimit: 10
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: '#f0f0f0'
+                        },
+                        ticks: {
+                            color: '#586069',
+                            font: {
+                                size: 0.75rem
+                            },
+                            callback: function(value) {
+                                return '$' + value.toFixed(2);
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // Date range button handlers
+    document.querySelectorAll('[data-days]').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('[data-days]').forEach(function(b) {
+                b.classList.remove('active');
+            });
+            btn.classList.add('active');
+            loadCosts(parseInt(btn.dataset.days));
+        });
+    });
+
+    // Initial load
+    document.addEventListener('DOMContentLoaded', function() {
+        loadCosts(30);
+    });
+</script>
+{% endblock %}
