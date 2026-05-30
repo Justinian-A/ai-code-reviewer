@@ -1,5 +1,6 @@
 import { Link, useLocation } from 'react-router-dom'
 import { GitPullRequest, History, Home } from 'lucide-react'
+import ThemeToggle from './ThemeToggle'
 
 export default function Navbar() {
   const location = useLocation()
@@ -21,7 +22,7 @@ export default function Navbar() {
           </Link>
 
           {/* Navigation Links */}
-          <div className="flex items-center space-x-1">
+          <div className="flex items-center space-x-2">
             <Link
               to="/"
               className={`flex items-center space-x-1 px-4 py-2 rounded-md text-sm font-medium transition-colors ${isActive('/')}`}
@@ -36,6 +37,7 @@ export default function Navbar() {
               <History size={16} />
               <span>历史记录</span>
             </Link>
+            <ThemeToggle />
           </div>
         </div>
       </div>

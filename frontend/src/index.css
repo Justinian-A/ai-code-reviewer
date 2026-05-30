@@ -6,10 +6,16 @@
   --color-primary: #2563eb;
 }
 
+/* 浅色模式 */
 body {
   @apply bg-gray-50 text-gray-900;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+}
+
+/* 暗色模式 */
+.dark body {
+  @apply bg-gray-900 text-gray-100;
 }
 
 /* 自定义滚动条 */
@@ -22,12 +28,24 @@ body {
   @apply bg-gray-100;
 }
 
+.dark ::-webkit-scrollbar-track {
+  @apply bg-gray-800;
+}
+
 ::-webkit-scrollbar-thumb {
   @apply bg-gray-300 rounded-full;
 }
 
+.dark ::-webkit-scrollbar-thumb {
+  @apply bg-gray-600;
+}
+
 ::-webkit-scrollbar-thumb:hover {
   @apply bg-gray-400;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  @apply bg-gray-500;
 }
 
 /* 代码高亮 */
@@ -40,8 +58,16 @@ body {
   @apply bg-green-50 border-l-4 border-green-500;
 }
 
+.dark .diff-added {
+  @apply bg-green-900/20 border-green-500;
+}
+
 .diff-removed {
   @apply bg-red-50 border-l-4 border-red-500;
+}
+
+.dark .diff-removed {
+  @apply bg-red-900/20 border-red-500;
 }
 
 /* 风险等级颜色 */
@@ -49,10 +75,55 @@ body {
   @apply text-red-600 bg-red-50;
 }
 
+.dark .risk-high {
+  @apply text-red-400 bg-red-900/20;
+}
+
 .risk-medium {
   @apply text-yellow-600 bg-yellow-50;
 }
 
+.dark .risk-medium {
+  @apply text-yellow-400 bg-yellow-900/20;
+}
+
 .risk-low {
   @apply text-green-600 bg-green-50;
+}
+
+.dark .risk-low {
+  @apply text-green-400 bg-green-900/20;
+}
+
+/* 暗色模式通用样式 */
+.dark .bg-white {
+  @apply bg-gray-800;
+}
+
+.dark .bg-gray-50 {
+  @apply bg-gray-900;
+}
+
+.dark .text-gray-900 {
+  @apply text-gray-100;
+}
+
+.dark .text-gray-700 {
+  @apply text-gray-200;
+}
+
+.dark .text-gray-600 {
+  @apply text-gray-300;
+}
+
+.dark .text-gray-500 {
+  @apply text-gray-400;
+}
+
+.dark .border-gray-200 {
+  @apply border-gray-700;
+}
+
+.dark .border-gray-100 {
+  @apply border-gray-800;
 }

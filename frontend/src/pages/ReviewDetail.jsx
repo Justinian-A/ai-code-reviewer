@@ -216,25 +216,50 @@ export default function ReviewDetail() {
         </div>
       </div>
 
+      {/* 统计卡片 */}
+      {analysis.summary && (
+        <div className="grid md:grid-cols-3 gap-4 mb-6">
+          <div className="bg-white rounded-xl border border-gray-100 p-4 text-center">
+            <div className="text-2xl font-bold text-primary-600">{issues.length}</div>
+            <div className="text-sm text-gray-500">发现问题</div>
+          </div>
+          <div className="bg-white rounded-xl border border-gray-100 p-4 text-center">
+            <div className="text-2xl font-bold text-yellow-600">
+              {issues.filter(i => i.severity === 'high').length}
+            </div>
+            <div className="text-sm text-gray-500">高风险</div>
+          </div>
+          <div className="bg-white rounded-xl border border-gray-100 p-4 text-center">
+            <div className="text-2xl font-bold text-green-600">
+              {analysis.positive_points?.length || 0}
+            </div>
+            <div className="text-sm text-gray-500">优点</div>
+          </div>
+        </div>
+      )}
+
       {/* 变更总结 */}
       {analysis.summary && (
-        <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-3 flex items-center">
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 mb-6">
+          <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
             <FileCode className="w-5 h-5 mr-2 text-primary-600" />
             变更总结
           </h2>
-          <p className="text-gray-700 whitespace-pre-wrap">{analysis.summary}</p>
+          <p className="text-gray-700 whitespace-pre-wrap leading-relaxed">{analysis.summary}</p>
 
           {analysis.key_changes && analysis.key_changes.length > 0 && (
-            <div className="mt-4">
-              <h3 className="text-sm font-medium text-gray-700 mb-2">主要变更：</h3>
-              <ul className="list-disc list-inside space-y-1">
+            <div className="mt-5 pt-5 border-t border-gray-100">
+              <h3 className="text-sm font-semibold text-gray-700 mb-3">主要变更：</h3>
+              <div className="space-y-2">
                 {analysis.key_changes.map((change, index) => (
-                  <li key={index} className="text-gray-600 text-sm">
-                    {change}
-                  </li>
+                  <div key={index} className="flex items-start">
+                    <span className="w-6 h-6 bg-primary-50 text-primary-600 rounded-full flex items-center justify-center text-xs font-medium mr-3 flex-shrink-0">
+                      {index + 1}
+                    </span>
+                    <span className="text-gray-600 text-sm">{change}</span>
+                  </div>
                 ))}
-              </ul>
+              </div>
             </div>
           )}
         </div>
@@ -243,13 +268,16 @@ export default function ReviewDetail() {
       {/* 问题列表 */}
       {issues.length > 0 && (
         <div className="mb-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+          <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
             <AlertTriangle className="w-5 h-5 mr-2 text-yellow-600" />
-            发现的问题 ({issues.length})
+            发现的问题
+            <span className="ml-2 px-2.5 py-0.5 bg-yellow-50 text-yellow-700 text-sm font-medium rounded-full">
+              {issues.length}
+            </span>
           </h2>
 
           <div className="space-y-3">
-            {issues.map((issue) => {
+            {issues.map((issue, index) => {
               const severity = severityColors[issue.severity] || severityColors.low
               const category = categoryLabels[issue.category] || categoryLabels.other
               const isExpanded = expandedIssues.has(issue.id)
@@ -257,23 +285,28 @@ export default function ReviewDetail() {
               return (
                 <div
                   key={issue.id}
-                  className={`${severity.bg} border ${severity.border} rounded-lg overflow-hidden`}
+                  className={`${severity.bg} border ${severity.border} rounded-xl overflow-hidden transition-all`}
                 >
                   <button
                     onClick={() => toggleIssue(issue.id)}
-                    className="w-full px-4 py-3 flex items-start justify-between text-left hover:opacity-90 transition-opacity"
+                    className="w-full px-5 py-4 flex items-start justify-between text-left hover:opacity-90 transition-opacity"
                   >
                     <div className="flex items-start space-x-3">
-                      <span className="text-lg">{severity.icon}</span>
-                      <div>
-                        <div className="flex items-center space-x-2 mb-1">
-                          <span
-                            className={`px-2 py-0.5 text-xs font-medium rounded-full ${category.color}`}
-                          >
+                      <span className="text-lg mt-0.5">{severity.icon}</span>
+                      <div className="flex-1">
+                        <div className="flex items-center flex-wrap gap-2 mb-2">
+                          <span className={`px-2.5 py-0.5 text-xs font-semibold rounded-full ${category.color}`}>
                             {category.label}
                           </span>
+                          <span className={`px-2.5 py-0.5 text-xs font-medium rounded-full ${
+                            issue.severity === 'high' ? 'bg-red-200 text-red-800' :
+                            issue.severity === 'medium' ? 'bg-yellow-200 text-yellow-800' :
+                            'bg-blue-200 text-blue-800'
+                          }`}>
+                            {issue.severity === 'high' ? '高' : issue.severity === 'medium' ? '中' : '低'}
+                          </span>
                           {issue.file_path && (
-                            <span className="text-xs text-gray-500 font-mono">
+                            <span className="text-xs text-gray-500 font-mono bg-white px-2 py-0.5 rounded">
                               {issue.file_path}
                               {issue.line_number && `:${issue.line_number}`}
                             </span>
@@ -283,17 +316,19 @@ export default function ReviewDetail() {
                       </div>
                     </div>
                     {isExpanded ? (
-                      <ChevronUp className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                      <ChevronUp className="w-5 h-5 text-gray-400 flex-shrink-0 ml-2" />
                     ) : (
-                      <ChevronDown className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                      <ChevronDown className="w-5 h-5 text-gray-400 flex-shrink-0 ml-2" />
                     )}
                   </button>
 
                   {isExpanded && issue.suggestion && (
-                    <div className="px-4 pb-4 pt-1 ml-10">
-                      <div className="bg-white rounded-md p-3 border border-gray-200">
-                        <h4 className="text-sm font-medium text-gray-700 mb-1">💡 改进建议：</h4>
-                        <p className="text-sm text-gray-600 whitespace-pre-wrap">
+                    <div className="px-5 pb-4 pt-1 ml-11">
+                      <div className="bg-white rounded-xl p-4 border border-gray-200">
+                        <h4 className="text-sm font-semibold text-gray-700 mb-2 flex items-center">
+                          💡 改进建议
+                        </h4>
+                        <p className="text-sm text-gray-600 whitespace-pre-wrap leading-relaxed">
                           {issue.suggestion}
                         </p>
                       </div>
@@ -308,27 +343,31 @@ export default function ReviewDetail() {
 
       {/* 正面评价 */}
       {analysis.positive_points && analysis.positive_points.length > 0 && (
-        <div className="bg-green-50 border border-green-200 rounded-lg p-6 mb-6">
-          <h2 className="text-lg font-semibold text-green-900 mb-3 flex items-center">
+        <div className="bg-green-50 border border-green-200 rounded-2xl p-6 mb-6">
+          <h2 className="text-lg font-bold text-green-900 mb-4 flex items-center">
             <CheckCircle className="w-5 h-5 mr-2 text-green-600" />
             值得肯定
           </h2>
-          <ul className="space-y-2">
+          <div className="space-y-3">
             {analysis.positive_points.map((point, index) => (
-              <li key={index} className="flex items-start">
-                <span className="text-green-500 mr-2">✓</span>
-                <span className="text-green-800">{point}</span>
-              </li>
+              <div key={index} className="flex items-start">
+                <span className="w-6 h-6 bg-green-200 text-green-700 rounded-full flex items-center justify-center text-xs mr-3 flex-shrink-0">
+                  ✓
+                </span>
+                <span className="text-green-800 text-sm">{point}</span>
+              </div>
             ))}
-          </ul>
+          </div>
         </div>
       )}
 
       {/* 总体评价 */}
       {analysis.overall_comment && (
-        <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-3">📝 总体评价</h2>
-          <p className="text-gray-700 whitespace-pre-wrap">{analysis.overall_comment}</p>
+        <div className="bg-gradient-to-br from-primary-50 to-purple-50 border border-primary-100 rounded-2xl p-6 mb-6">
+          <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
+            📝 总体评价
+          </h2>
+          <p className="text-gray-700 whitespace-pre-wrap leading-relaxed">{analysis.overall_comment}</p>
         </div>
       )}
     </div>
