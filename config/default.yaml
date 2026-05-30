@@ -1,0 +1,12 @@
+ai:
+  api_key: ''
+  max_tokens: 4096
+  model: deepseek-v4-flash
+  provider: deepseek
+analysis:
+  enable_ai: true
+  enable_ast: true
+github:
+  token: ''
+output:
+  format: terminal

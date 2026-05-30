@@ -1,236 +1,228 @@
-# AI Code Reviewer - AI 代码评审助手
+# AI Code Reviewer
 
-[![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://www.python.org/)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.109+-green.svg)](https://fastapi.tiangolo.com/)
-[![React](https://img.shields.io/badge/React-18+-61DAFB.svg)](https://reactjs.org/)
-[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+基于AI的代码审查工具，专为GitHub Pull Request设计。结合AST静态分析与LLM语义审查，捕捉人工审查容易遗漏的风险代码。
 
-> 🤖 AI 辅助代码评审工具，自动分析 GitHub Pull Request，识别潜在问题，提供专业的评审建议
+## 功能特性
 
-## ✨ 功能特性
+**核心能力**
+- PR变更摘要自动生成
+- 风险代码识别（安全漏洞、逻辑错误、架构问题）
+- 可操作的Review建议输出
+- 直接发布审查结果到GitHub PR
 
-- 📋 **变更总结** - 自动分析 PR 变更内容，生成结构化摘要
-- ⚠️ **风险识别** - 识别潜在 Bug、安全漏洞、性能问题
-- 💡 **改进建议** - 针对具体代码行给出优化建议
-- 📊 **历史记录** - 保存分析历史，支持对比查看
-- 🖥️ **桌面应用** - 支持打包成桌面软件，双击即用
+**语言支持**
+- Python
+- JavaScript / TypeScript
 
-## 🚀 快速开始
+**AI模型**
+- DeepSeek (deepseek-chat)
+- Claude (claude-sonnet-4-20250514)
+- GPT-4o
 
-### 方式一：桌面版（推荐）
+通过LiteLLM统一调用，切换模型只需修改配置。
 
-1. 下载项目
-2. 双击 `启动器.py` 或 `快速启动.bat`
-3. 浏览器自动打开 http://localhost:8000
+**输出方式**
+- 终端彩色输出（Rich）
+- Markdown文件
+- JSON结构化数据
+- 中英文双语报告
 
-### 方式二：手动启动
+**交互方式**
+- CLI命令行工具
+- Web管理界面（FastAPI + Bootstrap 5）
 
-```bash
-# 1. 安装后端依赖
-cd backend
-pip install -r requirements.txt
+## 安装
 
-# 2. 构建前端
-cd ../frontend
-npm install
-npm run build
+**环境要求**: Python 3.11+
 
-# 3. 启动服务
-cd ../backend
-python -m uvicorn app.main:app --host 127.0.0.1 --port 8000
-
-# 4. 访问 http://localhost:8000
-```
-
-### 方式三：Docker 部署
+**通过pip安装**
 
 ```bash
-# 配置环境变量
-cp .env.example .env
-# 编辑 .env 填入 API Key
-
-# 启动
-docker-compose up -d
-
-# 访问 http://localhost
+pip install ai-code-reviewer
 ```
 
-## 📖 使用方法
+**从源码安装**
 
-1. 访问首页，输入 GitHub PR 链接
-2. 填入 GitHub Token（推荐，避免 API 频率限制）
-3. 点击「开始分析」
-4. 等待 AI 分析完成（约 1-2 分钟）
-5. 查看分析报告
-
-### 获取 GitHub Token
-
-1. 访问 https://github.com/settings/tokens
-2. 点击「Generate new token」
-3. 选择权限：`repo`（全部）
-4. 生成并复制 Token
-
-## 🏗️ 技术架构
-
-```
-┌─────────────────────────────────────────────────────┐
-│                    用户界面层                         │
-│              React + TailwindCSS                     │
-└─────────────────────────────────────────────────────┘
-                          │
-                          ▼
-┌─────────────────────────────────────────────────────┐
-│                    API 服务层                         │
-│                 FastAPI (Python)                     │
-│    ┌──────────┐  ┌──────────┐  ┌──────────┐        │
-│    │ 认证服务  │  │ 评审服务  │  │ GitHub   │        │
-│    └──────────┘  └──────────┘  └──────────┘        │
-└─────────────────────────────────────────────────────┘
-                          │
-                          ▼
-┌─────────────────────────────────────────────────────┐
-│                    数据层                            │
-│    ┌──────────┐  ┌──────────┐  ┌──────────┐        │
-│    │  SQLite  │  │ MiMo API │  │GitHub API│        │
-│    └──────────┘  └──────────┘  └──────────┘        │
-└─────────────────────────────────────────────────────┘
+```bash
+git clone https://github.com/Justinian-A/ai-code-reviewer.git
+cd ai-code-reviewer
+pip install -e .
 ```
 
-### 技术选型
+**安装Web界面依赖**
 
-| 层级 | 技术 | 说明 |
-|------|------|------|
-| 前端 | React + TailwindCSS | 组件化开发，响应式设计 |
-| 后端 | Python + FastAPI | 异步高性能，AI 集成方便 |
-| 数据库 | SQLite | 轻量级，无需额外部署 |
-| AI 模型 | MiMo v2.5 Pro | 小米推理模型，代码理解能力强 |
-| GitHub | REST API | 获取 PR 数据和代码变更 |
-
-### 设计思路
-
-#### 模型选择
-
-选择 MiMo v2.5 Pro 模型的原因：
-- 国产模型，中文理解能力强
-- 推理能力突出，适合代码分析场景
-- 通过 OpenAI 兼容 API 调用，集成方便
-
-#### 上下文获取方式
-
-采用分层获取策略：
-1. **Level 1**: PR 元数据（标题、描述、评论）
-2. **Level 2**: 代码变更（diff）
-3. **Level 3**: 完整文件内容（按需获取）
-
-#### 误报与漏报控制
-
-- 置信度评分：每个问题标注置信度（0.0-1.0）
-- 分级展示：高置信度问题优先展示
-- 上下文增强：获取更多上下文减少误判
-
-## 📁 项目结构
-
-```
-ai-code-review/
-├── README.md                  # 项目说明
-├── PROJECT_REQUIREMENTS.md    # 需求文档
-├── DEPLOYMENT.md              # 部署指南
-├── 使用说明.txt               # 用户文档
-├── 启动器.py                  # Python 启动器
-├── 快速启动.bat               # 快速启动脚本
-├── build-desktop.bat          # 打包桌面版
-├── docker-compose.yml         # Docker 编排
-├── .env.example               # 环境变量模板
-│
-├── backend/                   # 后端服务
-│   ├── app/
-│   │   ├── main.py            # FastAPI 主应用
-│   │   ├── config.py          # 配置管理
-│   │   ├── database.py        # 数据库模块
-│   │   ├── api/               # API 路由
-│   │   └── services/          # 业务服务
-│   ├── requirements.txt       # Python 依赖
-│   └── Dockerfile
-│
-├── frontend/                  # 前端应用
-│   ├── src/
-│   │   ├── pages/             # 页面组件
-│   │   ├── components/        # 公共组件
-│   │   └── services/          # API 服务
-│   ├── package.json
-│   └── Dockerfile
-│
-├── electron/                  # 桌面版配置
-│   ├── main.js
-│   └── package.json
-│
-└── dev-logs/                  # 开发日志
-    └── 2025-05-29.md
-    └── 2025-05-30.md
+```bash
+pip install -e ".[web]"
 ```
 
-## 🗺️ 开发日志
+**安装开发依赖**
 
-### 2025-05-29 - 项目启动
+```bash
+pip install -e ".[dev]"
+```
 
-- ✅ 需求分析与技术选型
-- ✅ 后端框架搭建（FastAPI）
-- ✅ 前端项目初始化（React + TailwindCSS）
-- ✅ 核心功能实现
-  - GitHub API 集成
-  - MiMo AI 分析服务
-  - PR 分析 API
-  - 可视化报告页面
+## 使用方法
 
-### 2025-05-30 - 功能优化
+### CLI命令行
 
-- ✅ 优化 MiMo prompt（提升中文输出质量）
-- ✅ 添加加载动画组件
-- ✅ 生产部署支持（Docker）
-- ✅ 桌面版打包支持（Electron）
+**初始化配置**
 
-## 🔧 API 接口
+```bash
+ai-code-reviewer config init
+```
 
-### 评审相关
+**设置凭据**
 
-| 方法 | 路径 | 说明 |
-|------|------|------|
-| POST | /api/reviews/analyze | 创建 PR 分析任务 |
-| GET | /api/reviews/history | 获取评审历史 |
-| GET | /api/reviews/{id} | 获取评审详情 |
-| DELETE | /api/reviews/{id} | 删除评审记录 |
+```bash
+ai-code-reviewer config set github.token "ghp_your_token"
+ai-code-reviewer config set ai.api_key "your_api_key"
+ai-code-reviewer config set ai.provider "deepseek"
+```
 
-### GitHub 相关
+**分析PR**
 
-| 方法 | 路径 | 说明 |
-|------|------|------|
-| POST | /api/github/parse-url | 解析 PR URL |
-| POST | /api/github/pr-info | 获取 PR 信息 |
+```bash
+# 基本分析
+ai-code-reviewer analyze https://github.com/owner/repo/pull/123
 
-## 📝 未来计划
+# 输出Markdown到文件
+ai-code-reviewer analyze https://github.com/owner/repo/pull/123 -f markdown -o review.md
 
-- [ ] CLI 命令行工具
-- [ ] GitHub Webhook 自动触发
-- [ ] 多模型支持（Claude、GPT-4）
-- [ ] 团队协作功能
-- [ ] 自定义分析规则
-- [ ] VS Code 插件
+# 输出JSON
+ai-code-reviewer analyze https://github.com/owner/repo/pull/123 -f json -o review.json
 
-## 🤝 贡献
+# 发布审查到GitHub
+ai-code-reviewer analyze https://github.com/owner/repo/pull/123 --publish
 
-欢迎提交 Issue 和 Pull Request！
+# 发布前预览
+ai-code-reviewer analyze https://github.com/owner/repo/pull/123 --preview
 
-## 📄 License
+# 生成中文报告
+ai-code-reviewer analyze https://github.com/owner/repo/pull/123 -l zh
+```
+
+**查看配置**
+
+```bash
+ai-code-reviewer config show
+```
+
+**环境变量**
+
+可通过环境变量覆盖配置文件，前缀为 `AI_CODE_REVIEWER_`：
+
+```bash
+export AI_CODE_REVIEWER_GITHUB_TOKEN="ghp_xxx"
+export AI_CODE_REVIEWER_AI_API_KEY="sk-xxx"
+export AI_CODE_REVIEWER_AI_PROVIDER="claude"
+```
+
+### Web界面
+
+```bash
+# 安装Web依赖
+pip install -e ".[web]"
+
+# 启动服务
+python -m ai_code_reviewer.web
+```
+
+访问 `http://localhost:8080`，支持：
+- 输入PR URL进行在线分析
+- 查看历史分析记录
+- 管理API配置
+- 查看用量和成本统计
+
+详细文档见 [Web界面文档](docs/web.md)。
+
+## 技术架构
+
+```
+┌─────────────────────────────────────────────────┐
+│                   用户界面层                       │
+│         CLI (Click + Rich)  │  Web (FastAPI)      │
+├─────────────────────────────────────────────────┤
+│                   核心引擎层                       │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐       │
+│  │ GitHub   │  │ AST分析器 │  │ LLM审查器 │       │
+│  │ API客户端 │  │(Tree-sitter)│ │(LiteLLM) │       │
+│  └──────────┘  └──────────┘  └──────────┘       │
+├─────────────────────────────────────────────────┤
+│                   数据层                          │
+│       SQLite数据库  │  YAML配置文件               │
+└─────────────────────────────────────────────────┘
+```
+
+**工作流程**
+
+1. 从GitHub API获取PR元数据和文件差异
+2. Tree-sitter进行AST解析，识别结构问题
+3. 将差异发送给LLM进行语义风险检测
+4. 合并、去重、优先级排序发现项
+5. 生成摘要和可执行建议
+6. 输出到终端、文件或GitHub
+
+**风险分类**
+
+| 类别 | 示例 |
+|------|------|
+| 安全 | SQL注入、XSS、硬编码密钥、不安全加密 |
+| 逻辑 | 空引用、边界错误、竞态条件、异常处理 |
+| 架构 | 紧耦合、循环依赖、SOLID违反 |
+
+风险等级: `critical` > `high` > `medium` > `low` > `info`
+
+## 开发指南
+
+```bash
+# 克隆仓库
+git clone https://github.com/Justinian-A/ai-code-reviewer.git
+cd ai-code-reviewer
+
+# 安装开发依赖
+pip install -e ".[dev]"
+
+# 运行测试
+pytest
+
+# 代码检查
+ruff check .
+
+# 格式化检查
+black --check .
+
+# 类型检查
+mypy src/
+```
+
+**项目结构**
+
+```
+ai-code-reviewer/
+├── src/ai_code_reviewer/    # 源代码
+│   ├── analyzers/           # AST分析器
+│   ├── github/              # GitHub API集成
+│   ├── llm/                 # LLM调用封装
+│   ├── web/                 # Web界面
+│   └── main.py              # CLI入口
+├── tests/                   # 测试文件
+├── docs/                    # 文档
+├── config/                  # 配置模板
+└── pyproject.toml           # 项目配置
+```
+
+## 文档
+
+- [安装指南](docs/installation.md)
+- [配置参考](docs/configuration.md)
+- [使用指南](docs/usage.md)
+- [示例](docs/examples.md)
+- [Web界面文档](docs/web.md)
+
+## 许可证
 
 MIT License
 
-## 🙏 致谢
+## 项目地址
 
-- [FastAPI](https://fastapi.tiangolo.com/)
-- [React](https://reactjs.org/)
-- [TailwindCSS](https://tailwindcss.com/)
-- [MiMo](https://github.com/XiaomiMiMo)
-
----
-
-**开发者**: [Justinian-A](https://github.com/Justinian-A)
+https://github.com/Justinian-A/ai-code-reviewer

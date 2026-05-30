@@ -1,0 +1,254 @@
+{% extends "base.html" %}
+
+{% set active_page = "config" %}
+
+{% block title %}配置管理 - AI Code Reviewer{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <!-- Page Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1 class="h3 mb-1">配置管理</h1>
+                <p class="text-muted mb-0">管理 GitHub Token 和 AI API 配置</p>
+            </div>
+        </div>
+
+        <!-- Alert Area -->
+        <div id="configAlert" class="alert d-none mb-4" role="alert">
+            <div class="d-flex align-items-center">
+                <i id="alertIcon" class="bi me-2"></i>
+                <span id="alertMessage"></span>
+            </div>
+        </div>
+
+        <!-- Configuration Card -->
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-bottom">
+                <h5 class="mb-0">
+                    <i class="bi bi-gear me-2"></i>系统配置
+                </h5>
+            </div>
+            <div class="card-body p-4">
+                <form id="configForm">
+                    <!-- GitHub Configuration Section -->
+                    <div class="mb-4">
+                        <h6 class="fw-semibold mb-3">
+                            <i class="bi bi-github me-2"></i>GitHub 配置
+                        </h6>
+                        <div class="mb-3">
+                            <label for="githubToken" class="form-label fw-medium">GitHub Token</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0">
+                                    <i class="bi bi-key text-muted"></i>
+                                </span>
+                                <input type="password" class="form-control border-start-0" id="githubToken"
+                                       placeholder="github_pat_xxxxx">
+                            </div>
+                            <div class="form-text">用于访问 GitHub API，获取 PR 数据和提交代码审查结果</div>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <!-- AI Configuration Section -->
+                    <div class="mb-4">
+                        <h6 class="fw-semibold mb-3">
+                            <i class="bi bi-robot me-2"></i>AI 配置
+                        </h6>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="aiProvider" class="form-label fw-medium">AI Provider</label>
+                                <select class="form-select" id="aiProvider">
+                                    <option value="deepseek">DeepSeek</option>
+                                    <option value="claude">Claude</option>
+                                    <option value="openai">OpenAI</option>
+                                </select>
+                                <div class="form-text">选择 AI 服务提供商</div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="aiModel" class="form-label fw-medium">模型</label>
+                                <input type="text" class="form-control" id="aiModel"
+                                       placeholder="deepseek-v4-flash">
+                                <div class="form-text">使用的 AI 模型名称</div>
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mt-1">
+                            <div class="col-md-8">
+                                <label for="aiApiKey" class="form-label fw-medium">API Key</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0">
+                                        <i class="bi bi-shield-lock text-muted"></i>
+                                    </span>
+                                    <input type="password" class="form-control border-start-0" id="aiApiKey"
+                                           placeholder="sk-xxxxx">
+                                </div>
+                                <div class="form-text">AI 服务的 API 密钥</div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label for="aiMaxTokens" class="form-label fw-medium">最大 Token 数</label>
+                                <input type="number" class="form-control" id="aiMaxTokens"
+                                       value="4096" min="1" max="32000">
+                                <div class="form-text">单次请求最大 Token 限制</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <!-- Action Buttons -->
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary" id="saveBtn">
+                            <i class="bi bi-save me-1"></i> 保存配置
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary" id="testBtn">
+                            <i class="bi bi-check-circle me-1"></i> 测试配置
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    /**
+     * Configuration page - Handles config loading, saving, and testing
+     */
+    document.addEventListener('DOMContentLoaded', function() {
+        loadConfig();
+        initConfigForm();
+        initTestButton();
+    });
+
+    /**
+     * Show alert message
+     */
+    function showAlert(type, message) {
+        const alert = document.getElementById('configAlert');
+        const icon = document.getElementById('alertIcon');
+        const messageEl = document.getElementById('alertMessage');
+
+        // Remove all alert classes
+        alert.className = 'alert mb-4';
+
+        // Set type-specific styles and icon
+        switch (type) {
+            case 'success':
+                alert.classList.add('alert-success');
+                icon.className = 'bi bi-check-circle-fill me-2';
+                break;
+            case 'danger':
+                alert.classList.add('alert-danger');
+                icon.className = 'bi bi-exclamation-triangle-fill me-2';
+                break;
+            case 'warning':
+                alert.classList.add('alert-warning');
+                icon.className = 'bi bi-exclamation-circle-fill me-2';
+                break;
+        }
+
+        messageEl.textContent = message;
+        alert.classList.remove('d-none');
+
+        // Auto-hide after 5 seconds
+        setTimeout(() => {
+            alert.classList.add('d-none');
+        }, 5000);
+    }
+
+    /**
+     * Load configuration from API
+     */
+    async function loadConfig() {
+        try {
+            const config = await AIReviewer.apiRequest('/api/config');
+
+            // Populate form fields
+            document.getElementById('githubToken').value = config.github_token || '';
+            document.getElementById('aiProvider').value = config.ai_provider || 'deepseek';
+            document.getElementById('aiApiKey').value = config.ai_api_key || '';
+            document.getElementById('aiModel').value = config.ai_model || 'deepseek-v4-flash';
+            document.getElementById('aiMaxTokens').value = config.ai_max_tokens || 4096;
+        } catch (error) {
+            console.error('Failed to load config:', error);
+            showAlert('danger', '加载配置失败: ' + error.message);
+        }
+    }
+
+    /**
+     * Initialize config form submission
+     */
+    function initConfigForm() {
+        const form = document.getElementById('configForm');
+        const saveBtn = document.getElementById('saveBtn');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // Disable button during save
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>保存中...';
+
+            try {
+                const config = {
+                    github_token: document.getElementById('githubToken').value,
+                    ai_provider: document.getElementById('aiProvider').value,
+                    ai_api_key: document.getElementById('aiApiKey').value,
+                    ai_model: document.getElementById('aiModel').value,
+                    ai_max_tokens: parseInt(document.getElementById('aiMaxTokens').value) || 4096
+                };
+
+                await AIReviewer.apiRequest('/api/config', {
+                    method: 'PUT',
+                    body: JSON.stringify(config)
+                });
+
+                showAlert('success', '配置保存成功！');
+            } catch (error) {
+                showAlert('danger', '配置保存失败: ' + error.message);
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = '<i class="bi bi-save me-1"></i> 保存配置';
+            }
+        });
+    }
+
+    /**
+     * Initialize test button
+     */
+    function initTestButton() {
+        const testBtn = document.getElementById('testBtn');
+
+        testBtn.addEventListener('click', async () => {
+            // Disable button during test
+            testBtn.disabled = true;
+            testBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>测试中...';
+
+            try {
+                const data = await AIReviewer.apiRequest('/api/config/test', {
+                    method: 'POST'
+                });
+
+                if (data.valid) {
+                    showAlert('success', '配置验证成功！所有连接正常。');
+                } else {
+                    showAlert('danger', '配置验证失败: ' + (data.error || '未知错误'));
+                }
+            } catch (error) {
+                showAlert('danger', '测试请求失败: ' + error.message);
+            } finally {
+                testBtn.disabled = false;
+                testBtn.innerHTML = '<i class="bi bi-check-circle me-1"></i> 测试配置';
+            }
+        });
+    }
+</script>
+{% endblock %}
