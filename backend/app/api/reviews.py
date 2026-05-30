@@ -9,7 +9,14 @@ import json
 import aiosqlite
 from pathlib import Path
 from app.database import get_db, DATABASE_PATH
-from app.services.github_service import GitHubService
+from app.services.github_service import (
+    GitHubService,
+    GitHubServiceError,
+    GitHubRateLimitError,
+    GitHubPRNotFoundError,
+    GitHubAuthError,
+    GitHubNetworkError,
+)
 from app.services.ai_service import AIService
 
 router = APIRouter()
@@ -107,16 +114,29 @@ async def analyze_pr_background(review_id: int, pr_url: str, github_token: Optio
 
             await db.commit()
 
-    except Exception as e:
+    except (GitHubServiceError, Exception) as e:
         import traceback
         error_traceback = traceback.format_exc()
         print(f"分析失败: {e}")
         print(error_traceback)
+
+        # 根据错误类型提供友好的错误信息
+        if isinstance(e, GitHubPRNotFoundError):
+            error_msg = f"❌ {str(e)}"
+        elif isinstance(e, GitHubRateLimitError):
+            error_msg = f"⏰ {str(e)}"
+        elif isinstance(e, GitHubAuthError):
+            error_msg = f"🔒 {str(e)}"
+        elif isinstance(e, GitHubNetworkError):
+            error_msg = f"🌐 {str(e)}"
+        else:
+            error_msg = f"❌ 分析失败: {str(e)}"
+
         # 更新为失败状态，保存错误信息
         async with aiosqlite.connect(DATABASE_PATH) as db:
             await db.execute(
                 "UPDATE reviews SET status = 'failed', summary = ? WHERE id = ?",
-                (f"错误: {str(e)}", review_id),
+                (error_msg, review_id),
             )
             await db.commit()
 
