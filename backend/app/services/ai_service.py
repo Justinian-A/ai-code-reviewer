@@ -50,7 +50,31 @@ class AIService:
         )
 
         result_text = response.choices[0].message.content
+        # Fix surrogate pairs from MiMo model
+        if result_text:
+            result_text = self._fix_surrogates(result_text)
         return self._parse_analysis_result(result_text)
+
+    def _fix_surrogates(self, text: str) -> str:
+        """修复 Unicode 代理对问题"""
+        # Method 1: Try surrogatepass
+        try:
+            fixed = text.encode('utf-16', 'surrogatepass').decode('utf-16')
+            if not any(0xD800 <= ord(c) <= 0xDFFF for c in fixed):
+                return fixed
+        except Exception:
+            pass
+
+        # Method 2: Replace surrogates with replacement character
+        result = []
+        for char in text:
+            cp = ord(char)
+            if 0xD800 <= cp <= 0xDFFF:
+                # Replace surrogate with replacement character
+                result.append('�')
+            else:
+                result.append(char)
+        return ''.join(result)
 
     def _get_system_prompt(self) -> str:
         """获取系统提示词"""
