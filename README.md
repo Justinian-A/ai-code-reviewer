@@ -13,6 +13,12 @@
 - 🌙 **暗色模式** - 支持深色主题
 - 👤 **用户系统** - 注册登录、个人记录管理
 
+## 🎬 演示视频
+
+[![演示视频](https://img.shields.io/badge/▶_观看演示视频-red?style=for-the-badge&logo=youtube)](https://github.com/Justinian-A/ai-code-reviewer/blob/main/demo.mp4)
+
+> 点击上方按钮观看项目演示视频，或直接下载 [demo.mp4](demo.mp4)
+
 ## 🚀 快速开始
 
 ### 前置要求
