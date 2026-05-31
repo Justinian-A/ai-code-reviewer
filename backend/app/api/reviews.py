@@ -18,6 +18,7 @@ from app.services.github_service import (
     GitHubNetworkError,
 )
 from app.services.ai_service import AIService
+from app.api.auth import get_current_user
 
 router = APIRouter()
 
@@ -83,6 +84,7 @@ async def analyze_pr_background(review_id: int, pr_url: str, github_token: Optio
                     summary = ?,
                     risk_level = ?,
                     analysis_result = ?,
+                    diff_content = ?,
                     completed_at = CURRENT_TIMESTAMP
                 WHERE id = ?""",
                 (
@@ -91,6 +93,7 @@ async def analyze_pr_background(review_id: int, pr_url: str, github_token: Optio
                     analysis_result.get("summary"),
                     analysis_result.get("risk_level"),
                     json.dumps(analysis_result, ensure_ascii=False),
+                    diff_content,
                     review_id,
                 ),
             )
@@ -142,7 +145,11 @@ async def analyze_pr_background(review_id: int, pr_url: str, github_token: Optio
 
 
 @router.post("/analyze", response_model=ReviewResponse)
-async def create_review(request: ReviewRequest, background_tasks: BackgroundTasks):
+async def create_review(
+    request: ReviewRequest,
+    background_tasks: BackgroundTasks,
+    current_user: Optional[dict] = Depends(get_current_user),
+):
     """创建 PR 分析任务"""
     try:
         # 验证 PR URL
@@ -150,13 +157,16 @@ async def create_review(request: ReviewRequest, background_tasks: BackgroundTask
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
+    # 使用认证用户的 ID，默认为 1（匿名用户）
+    user_id = current_user["id"] if current_user else 1
+
     try:
         # 创建记录
         async with aiosqlite.connect(DATABASE_PATH) as db:
             cursor = await db.execute(
                 """INSERT INTO reviews (user_id, pr_url, repo_owner, repo_name, pr_number, status)
-                VALUES (1, ?, ?, ?, ?, 'analyzing')""",
-                (request.pr_url, owner, repo, pr_number),
+                VALUES (?, ?, ?, ?, ?, 'analyzing')""",
+                (user_id, request.pr_url, owner, repo, pr_number),
             )
             await db.commit()
             review_id = cursor.lastrowid
@@ -242,6 +252,7 @@ async def get_review_detail(review_id: int):
             "summary": review["summary"],
             "risk_level": review["risk_level"],
             "analysis_result": analysis_result,
+            "diff_content": review["diff_content"],
             "issues": [
                 {
                     "id": issue["id"],

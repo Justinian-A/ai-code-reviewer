@@ -47,12 +47,19 @@ async def init_db():
                 summary TEXT,
                 risk_level TEXT,
                 analysis_result TEXT,
+                diff_content TEXT,
                 status TEXT DEFAULT 'pending',
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 completed_at TIMESTAMP,
                 FOREIGN KEY (user_id) REFERENCES users(id)
             )
         """)
+
+        # 添加 diff_content 列（如果不存在）
+        try:
+            await db.execute("ALTER TABLE reviews ADD COLUMN diff_content TEXT")
+        except Exception:
+            pass  # 列已存在
 
         # 问题详情表
         await db.execute("""

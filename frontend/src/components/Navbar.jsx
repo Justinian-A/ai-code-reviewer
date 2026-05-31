@@ -1,9 +1,11 @@
 import { Link, useLocation } from 'react-router-dom'
-import { GitPullRequest, History, Home } from 'lucide-react'
+import { GitPullRequest, History, Home, LogIn, LogOut, User } from 'lucide-react'
 import ThemeToggle from './ThemeToggle'
+import { useAuth } from '../contexts/AuthContext'
 
 export default function Navbar() {
   const location = useLocation()
+  const { user, isAuthenticated, logout } = useAuth()
 
   const isActive = (path) => {
     return location.pathname === path
@@ -37,6 +39,32 @@ export default function Navbar() {
               <History size={16} />
               <span>历史记录</span>
             </Link>
+
+            {/* Auth Section */}
+            {isAuthenticated ? (
+              <div className="flex items-center space-x-2">
+                <span className="flex items-center space-x-1 text-primary-100 text-sm px-3">
+                  <User size={16} />
+                  <span>{user?.username}</span>
+                </span>
+                <button
+                  onClick={logout}
+                  className="flex items-center space-x-1 px-3 py-2 rounded-md text-sm font-medium text-primary-100 hover:bg-primary-600 transition-colors"
+                >
+                  <LogOut size={16} />
+                  <span>退出</span>
+                </button>
+              </div>
+            ) : (
+              <Link
+                to="/login"
+                className={`flex items-center space-x-1 px-4 py-2 rounded-md text-sm font-medium transition-colors ${isActive('/login')}`}
+              >
+                <LogIn size={16} />
+                <span>登录</span>
+              </Link>
+            )}
+
             <ThemeToggle />
           </div>
         </div>

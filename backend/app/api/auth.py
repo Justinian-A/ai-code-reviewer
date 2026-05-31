@@ -8,9 +8,10 @@ from datetime import datetime, timedelta
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+import aiosqlite
 
 from app.config import get_settings
-from app.database import get_db
+from app.database import DATABASE_PATH
 
 router = APIRouter()
 settings = get_settings()
@@ -56,7 +57,8 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
 @router.post("/register", response_model=UserResponse)
 async def register(user: UserCreate):
     """用户注册"""
-    async with get_db() as db:
+    async with aiosqlite.connect(DATABASE_PATH) as db:
+        db.row_factory = aiosqlite.Row
         # 检查用户名是否已存在
         cursor = await db.execute(
             "SELECT id FROM users WHERE username = ? OR email = ?",
@@ -85,7 +87,8 @@ async def register(user: UserCreate):
 @router.post("/login", response_model=Token)
 async def login(form_data: OAuth2PasswordRequestForm = Depends()):
     """用户登录"""
-    async with get_db() as db:
+    async with aiosqlite.connect(DATABASE_PATH) as db:
+        db.row_factory = aiosqlite.Row
         cursor = await db.execute(
             "SELECT id, username, hashed_password FROM users WHERE username = ?",
             (form_data.username,),
@@ -106,3 +109,41 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
         )
 
         return {"access_token": access_token, "token_type": "bearer"}
+
+
+async def get_current_user(token: str = Depends(oauth2_scheme)):
+    """从 JWT Token 获取当前用户"""
+    credentials_exception = HTTPException(
+        status_code=401,
+        detail="无法验证凭据",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+        user_id: str = payload.get("sub")
+        if user_id is None:
+            raise credentials_exception
+    except JWTError:
+        raise credentials_exception
+
+    async with aiosqlite.connect(DATABASE_PATH) as db:
+        db.row_factory = aiosqlite.Row
+        cursor = await db.execute(
+            "SELECT id, username, email, github_token FROM users WHERE id = ?",
+            (int(user_id),),
+        )
+        user = await cursor.fetchone()
+        if user is None:
+            raise credentials_exception
+        return dict(user)
+
+
+@router.get("/me", response_model=UserResponse)
+async def get_me(current_user: dict = Depends(get_current_user)):
+    """获取当前用户信息"""
+    return UserResponse(
+        id=current_user["id"],
+        username=current_user["username"],
+        email=current_user["email"],
+        github_token=current_user.get("github_token"),
+    )
