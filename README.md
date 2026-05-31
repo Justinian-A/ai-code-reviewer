@@ -1,5 +1,5 @@
 # AI Code Reviewer - AI 代码评审助手
-demo视频链接🔗：https://www.bilibili.com/video/BV19PVQ6BEDP/?spm_id_from=333.1387.upload.video_card.click
+demo视频链接🔗：【AI PR Rexiew 助手项目demo】 https://www.bilibili.com/video/BV19PVQ6BEDP/?share_source=copy_web&vd_source=7d0f0b9ab88e06c3051e60648ea73e26
 
 [![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.109+-green.svg)](https://fastapi.tiangolo.com/)
