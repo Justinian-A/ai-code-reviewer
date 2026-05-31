@@ -2,6 +2,20 @@
 
 基于 AI 的 GitHub Pull Request 代码评审工具，帮助开发者提升 Review 效率与质量。
 
+---
+
+## 🎬 演示视频
+
+### 👇 点击下方图片观看演示视频 👇
+
+[![点击观看演示视频](https://img.shields.io/badge/🎬_点击观看演示视频-D00000?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Justinian-A/ai-code-reviewer/blob/main/demo.mp4)
+
+**直接链接**: https://github.com/Justinian-A/ai-code-reviewer/blob/main/demo.mp4
+
+> 💡 视频大小: 12.6 MB | 时长: 约 2 分钟
+
+---
+
 ## ✨ 功能特性
 
 - 🤖 **AI 智能分析** - 使用 MiMo 模型分析代码变更
@@ -12,12 +26,6 @@
 - 🎨 **代码高亮** - Diff 视图和语法高亮
 - 🌙 **暗色模式** - 支持深色主题
 - 👤 **用户系统** - 注册登录、个人记录管理
-
-## 🎬 演示视频
-
-[![演示视频](https://img.shields.io/badge/▶_观看演示视频-red?style=for-the-badge&logo=youtube)](https://github.com/Justinian-A/ai-code-reviewer/blob/main/demo.mp4)
-
-> 点击上方按钮观看项目演示视频，或直接下载 [demo.mp4](demo.mp4)
 
 ## 🚀 快速开始
 
@@ -110,6 +118,7 @@ ai-code-review/
 │   │   ├── contexts/      # React Context
 │   │   └── services/      # API 服务
 │   └── package.json
+├── demo.mp4                # 演示视频
 ├── electron/               # 桌面应用
 ├── 启动器.py              # Python 启动脚本
 ├── 快速启动.bat           # Windows 快速启动
