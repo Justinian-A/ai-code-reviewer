@@ -8,11 +8,9 @@
 
 ### 👇 点击下方图片观看演示视频 👇
 
-[![点击观看演示视频](https://img.shields.io/badge/🎬_点击观看演示视频-D00000?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Justinian-A/ai-code-reviewer/blob/main/demo.mp4)
+[![点击观看演示视频](https://img.shields.io/badge/🎬_Bilibili_观看演示视频-00A1D6?style=for-the-badge&logo=bilibili&logoColor=white)](https://www.bilibili.com/video/BV19PVQ6BEDP/)
 
-**直接链接**: https://github.com/Justinian-A/ai-code-reviewer/blob/main/demo.mp4
-
-> 💡 视频大小: 12.6 MB | 时长: 约 2 分钟
+**在线观看**: https://www.bilibili.com/video/BV19PVQ6BEDP/
 
 ---
 
